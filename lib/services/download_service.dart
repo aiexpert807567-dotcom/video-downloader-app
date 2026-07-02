@@ -10,8 +10,6 @@ class DownloadService {
     required void Function(double progress) onProgress,
   }) async {
     if (Platform.isAndroid) {
-      // On Android 13+ this permission is largely a no-op for app-scoped
-      // storage, but requesting it keeps older Android versions working.
       await Permission.storage.request();
     }
 
