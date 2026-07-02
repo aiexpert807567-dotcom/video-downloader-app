@@ -1,7 +1,9 @@
 class AppConfig {
   static const String backendBaseUrl =
-      "https://video-downloader-backend-bc5k.onrender.com";
+      "https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com";
+
+  // Ads are removed for now. To bring them back later:
+  // 1. Add google_mobile_ads back to pubspec.yaml
+  // 2. Re-add the ad code in main.dart and home_screen.dart (see project notes)
   static const bool showAds = false;
-  static const String bannerAdUnitId = "ca-app-pub-3940256099942544/6300978111";
-  static const String interstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712";
 }

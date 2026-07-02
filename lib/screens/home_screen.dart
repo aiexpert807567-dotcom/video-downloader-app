@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../config.dart';
 import '../models/video_info.dart';
 import '../services/api_service.dart';
 import '../services/download_service.dart';
@@ -23,28 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _downloading = false;
   double _progress = 0;
   String? _error;
-
-  BannerAd? _bannerAd;
-
-  @override
-  void initState() {
-    super.initState();
-    if (AppConfig.showAds) {
-      _loadBannerAd();
-    }
-  }
-
-  void _loadBannerAd() {
-    _bannerAd = BannerAd(
-      adUnitId: AppConfig.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) => setState(() {}),
-        onAdFailedToLoad: (ad, error) => ad.dispose(),
-      ),
-    )..load();
-  }
 
   Future<void> _fetchPreview() async {
     final url = _controller.text.trim();
@@ -105,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -164,13 +139,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: const Text("Download"),
                   ),
               ],
-              const Spacer(),
-              if (AppConfig.showAds && _bannerAd != null)
-                SizedBox(
-                  height: _bannerAd!.size.height.toDouble(),
-                  width: _bannerAd!.size.width.toDouble(),
-                  child: AdWidget(ad: _bannerAd!),
-                ),
             ],
           ),
         ),
