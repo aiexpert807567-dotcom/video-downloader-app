@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "740758228919",
+    "project_id": "video-downloader-app-e8200",
+    "storage_bucket": "video-downloader-app-e8200.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740758228919:android:95586353ca1596edb1e232",
+        "android_client_info": {
+          "package_name": "com.example.video_downloader_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJHV4h0NsmNbOG_Zhiah27JxEJ4MnnuzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
