@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
+import '../config.dart';
 
 class DownloadResult {
   final bool success;
@@ -13,13 +14,11 @@ class DownloadResult {
 
 class DownloadService {
   static Future<DownloadResult> downloadVideo({
-    required String url,
+    required String sourceUrl,
     required String fileName,
-    required Map<String, String> headers,
     required void Function(double progress) onProgress,
   }) async {
     try {
-      // Check/request permission to write to the device's gallery.
       final hasAccess = await Gal.hasAccess(toAlbum: true);
       if (!hasAccess) {
         final granted = await Gal.requestAccess(toAlbum: true);
@@ -30,28 +29,26 @@ class DownloadService {
         }
       }
 
-      // Step 1: download to a private temp folder first (fast, no permission issues).
       final tempDir = await getTemporaryDirectory();
       final tempPath = "${tempDir.path}/$fileName";
 
       final dio = Dio();
+      // Download from OUR backend's /download endpoint, not the raw CDN
+      // link. The backend proxies the video through itself, which avoids
+      // IP-locked 403 errors from YouTube/TikTok/Instagram CDNs.
       await dio.download(
-        url,
+        "${AppConfig.backendBaseUrl}/download",
         tempPath,
+        data: {"url": sourceUrl},
         options: Options(
-          headers: headers.isNotEmpty
-              ? headers
-              : {
-                  "User-Agent":
-                      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                },
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
           followRedirects: true,
           receiveTimeout: const Duration(minutes: 20),
           validateStatus: (status) => status != null && status < 400,
         ),
         onReceiveProgress: (received, total) {
           if (total > 0) {
-            // Reserve the last 5% of the bar for the gallery-save step.
             onProgress((received / total) * 0.95);
           }
         },
@@ -62,16 +59,12 @@ class DownloadService {
         return DownloadResult.fail("Downloaded file was empty or corrupted.");
       }
 
-      // Step 2: move it into the real public Gallery/Downloads (visible to the user).
       await Gal.putVideo(tempPath, album: "Video Downloader");
       onProgress(1.0);
 
-      // Clean up the temp copy now that it's safely in the gallery.
       try {
         await tempFile.delete();
-      } catch (_) {
-        // Non-fatal if cleanup fails.
-      }
+      } catch (_) {}
 
       return DownloadResult.ok();
     } on DioException catch (e) {
