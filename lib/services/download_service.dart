@@ -1,36 +1,42 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+class VideoInfo {
+  final String title;
+  final String thumbnail;
+  final int duration;
+  final String directUrl;
+  final String ext;
+  final Map<String, String> headers;
 
-class DownloadService {
-  static Future<String?> downloadVideo({
-    required String url,
-    required String fileName,
-    required void Function(double progress) onProgress,
-  }) async {
-    if (Platform.isAndroid) {
-      await Permission.storage.request();
+  VideoInfo({
+    required this.title,
+    required this.thumbnail,
+    required this.duration,
+    required this.directUrl,
+    required this.ext,
+    required this.headers,
+  });
+
+  factory VideoInfo.fromJson(Map<String, dynamic> json) {
+    final rawHeaders = json['headers'];
+    final headers = <String, String>{};
+    if (rawHeaders is Map) {
+      rawHeaders.forEach((key, value) {
+        headers[key.toString()] = value.toString();
+      });
     }
 
-    final dir = await getExternalStorageDirectory() ??
-        await getApplicationDocumentsDirectory();
-    final savePath = "${dir.path}/$fileName";
+    return VideoInfo(
+      title: json['title'] ?? 'Untitled',
+      thumbnail: json['thumbnail'] ?? '',
+      duration: json['duration'] ?? 0,
+      directUrl: json['direct_url'] ?? '',
+      ext: json['ext'] ?? 'mp4',
+      headers: headers,
+    );
+  }
 
-    final dio = Dio();
-    try {
-      await dio.download(
-        url,
-        savePath,
-        onReceiveProgress: (received, total) {
-          if (total > 0) {
-            onProgress(received / total);
-          }
-        },
-      );
-      return savePath;
-    } catch (_) {
-      return null;
-    }
+  String get formattedDuration {
+    final mins = duration ~/ 60;
+    final secs = duration % 60;
+    return "$mins:${secs.toString().padLeft(2, '0')}";
   }
 }
