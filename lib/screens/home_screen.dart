@@ -77,9 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final fileName = "$safeTitle.${_video!.ext}";
 
     final result = await DownloadService.downloadVideo(
-      url: _video!.directUrl,
+      sourceUrl: _controller.text.trim(),
       fileName: fileName,
-      headers: _video!.headers,
       onProgress: (p) => setState(() => _progress = p),
     );
 
